@@ -9,6 +9,7 @@ function App() {
        <Router> {/* Ensure the Router wraps your routes */}
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/Dashboard" element={<ManageUsers />} />
         <Route path="/register" element={<UserComponent />} />
         <Route path="/login" element={<Login />} />
       </Routes>

@@ -170,11 +170,11 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,u
         <div className="mb-4">
           <label className="block text-gray-700 mb-1">Role:</label>
           <select
-            value={role}
+            value={userType=='admin'?role:'guest'}
             onChange={(e) => setRole(e.target.value)}
             required
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
-            disabled={userType && userType?.toLowerCase()!=='admin'}
+            disabled={userType?.toLowerCase()!=='admin'}
           >
             {roles.map((role, index) => (
               <option key={index} value={role.name}>

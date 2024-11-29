@@ -42,7 +42,7 @@ This project is an **Admin Dashboard** built using **React.js** and styled with 
   -Logined user's username and role is displayed in dashboard.
   
 - **Registration Page** (`/register`):
-  - Allows new users to be added to the system.
+  - Allows new users to be added to the system.when a user himself register role will be guest.only admin can change the role.
 
 ###  Search Feature
 - a search feature implemented which gives a text box to search user in user list and role in role list.search by name of user and name of role is enabled.in case of no matching it shows No users found or No roles found.

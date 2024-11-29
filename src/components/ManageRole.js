@@ -1,36 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PencilSquareIcon, UserPlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const ManageRole = () => {
+const ManageRole = ({ permissions }) => {
   const [roles, setRoles] = useState(
     JSON.parse(localStorage.getItem("roles")) || []
   );
   const [roleToEdit, setRoleToEdit] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
-  const [activeSection, setActiveSection] = useState("roleList"); // Tracks active section: 'addRole' or 'roleList'
+  const [activeSection, setActiveSection] = useState("roleList");
   const [permissionsList] = useState([
     "Add Users",
-    "View Users",
     "Edit Users",
+    "View Users",
     "Delete Users",
     "Add Roles",
-    "Edit Roles/Permissions",
+    "Edit Roles",
     "View Roles",
     "Delete Roles",
   ]);
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [isAllChecked, setAllChecked] = useState(false);
   const [searchRole, setSearchRole] = useState("");
+
+  useEffect(() => {
+    if (roleToEdit) {
+      setSelectedPermissions(roleToEdit.permissions || []);
+      setAllChecked(
+        permissionsList.every((perm) => roleToEdit.permissions.includes(perm))
+      );
+    } else {
+      setSelectedPermissions([]);
+      setAllChecked(false);
+    }
+  }, [roleToEdit, permissionsList]);
+
   const updateLocalStorage = (updatedRoles) => {
     localStorage.setItem("roles", JSON.stringify(updatedRoles));
   };
 
+  const handleCheckAll = (e) => {
+    const allPermissions = e.target.checked ? [...permissionsList] : [];
+    setSelectedPermissions(allPermissions);
+    setAllChecked(e.target.checked);
+  };
+
+  const handlePermissionChange = (perm) => {
+    const updatedPermissions = selectedPermissions.includes(perm)
+      ? selectedPermissions.filter((p) => p !== perm)
+      : [...selectedPermissions, perm];
+    setSelectedPermissions(updatedPermissions);
+    setAllChecked(updatedPermissions.length === permissionsList.length);
+  };
+
   const addRole = (newRole) => {
     const isRoleNameUnique = roles.some((role) => role.name === newRole.name);
-  if (isRoleNameUnique) {
-    toast.error(`${newRole.name} already exists!`);
-    return;
-  }
+    if (isRoleNameUnique) {
+      toast.error(`${newRole.name} already exists!`);
+      return;
+    }
     const updatedRoles = [...roles, newRole];
     setRoles(updatedRoles);
     updateLocalStorage(updatedRoles);
@@ -45,12 +74,7 @@ const ManageRole = () => {
     updateLocalStorage(updatedRoles);
     setRoleToEdit(null);
     toast.success(`Role "${updatedRole.name}" has been updated!`);
-    setActiveSection("roleList"); // Switch to the role list after editing
-  };
-
-  const handleEdit = (role) => {
-    setRoleToEdit(role);
-    setActiveSection("addRole"); // Switch to the Add/Edit form
+    setActiveSection("roleList");
   };
 
   const deleteRole = (roleToDelete) => {
@@ -61,33 +85,41 @@ const ManageRole = () => {
     toast.success(`Role "${roleToDelete.name}" has been removed!`);
   };
 
-  const handleDelete = (role) => {
-    setSelectedRole(role);
+  const handleEdit = (role) => {
+    setRoleToEdit(role);
+    setActiveSection("addRole");
+  };
+
+  const clearEdit = () => {
+    setRoleToEdit(null);
   };
 
   const closeModal = () => {
     setSelectedRole(null);
   };
 
-  const clearEdit = () => {
-    setRoleToEdit(null); // Reset edit state
-  };
   const filteredRoles = roles.filter((role) =>
     role.name.toLowerCase().includes(searchRole.toLowerCase())
   );
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6 text-center">Manage Roles</h1>
 
-      {/* Toggle Buttons */}
       <div className="flex justify-center space-x-4 mb-6">
         <button
           className={`flex items-center px-4 py-2 rounded ${
-            activeSection === "addRole" ? "bg-blue-500 text-white" : "bg-gray-200"
+            activeSection === "addRole"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-500"
           }`}
           onClick={() => {
-            setActiveSection("addRole");
-            clearEdit(); // Clear editing state when switching to Add Role
+            if (permissions.includes("Add Roles")) {
+              setActiveSection("addRole");
+              clearEdit();
+            } else {
+              toast.error("You do not have permission to add roles.");
+            }
           }}
         >
           <UserPlusIcon className="h-5 w-5 mr-2" />
@@ -95,7 +127,9 @@ const ManageRole = () => {
         </button>
         <button
           className={`flex items-center px-4 py-2 rounded ${
-            activeSection === "roleList" ? "bg-blue-500 text-white" : "bg-gray-200"
+            activeSection === "roleList"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-500"
           }`}
           onClick={() => setActiveSection("roleList")}
         >
@@ -104,7 +138,6 @@ const ManageRole = () => {
         </button>
       </div>
 
-      {/* Conditional Rendering for Sections */}
       {activeSection === "addRole" && (
         <div className="bg-gray-100 p-6 rounded-lg shadow">
           <h2 className="text-2xl font-semibold mb-4">
@@ -114,7 +147,7 @@ const ManageRole = () => {
             onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target);
-              const roleName = formData.get("roleName");
+              const roleName = formData.get("roleName").trim();
               const permissions = formData.getAll("permissions");
 
               if (!roleName) {
@@ -141,15 +174,23 @@ const ManageRole = () => {
             />
             <h3 className="font-semibold mb-2">Permissions:</h3>
             <div className="grid grid-cols-2 gap-2 mb-4">
+              <label className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  checked={isAllChecked}
+                  onChange={handleCheckAll}
+                  className="mr-2"
+                />
+                All
+              </label>
               {permissionsList.map((perm, index) => (
                 <label key={index} className="flex items-center">
                   <input
                     type="checkbox"
                     name="permissions"
                     value={perm}
-                    defaultChecked={
-                      roleToEdit?.permissions?.includes(perm) || false
-                    }
+                    checked={selectedPermissions.includes(perm)}
+                    onChange={() => handlePermissionChange(perm)}
                     className="mr-2"
                   />
                   {perm}
@@ -175,8 +216,8 @@ const ManageRole = () => {
         </div>
       )}
 
-      {activeSection === "roleList" && (
-        <div className="bg-gray-100 p-6 rounded-lg shadow hover:bg-gray-300">
+      {activeSection === "roleList" && permissions.includes("View Roles") && (
+         <div className="bg-gray-100 p-6 rounded-lg shadow hover:bg-gray-300">
           <h2 className="text-2xl font-semibold mb-4">Roles List</h2>
           <div className="flex items-center mb-4">
             <input
@@ -209,12 +250,14 @@ const ManageRole = () => {
                     <button
                       onClick={() => handleEdit(role)}
                       className="text-blue-500 hover:text-blue-700"
+                      disabled={!permissions.includes("Edit Roles")}
                     >
                       <PencilSquareIcon className="h-6 w-6" />
                     </button>
                     <button
-                      onClick={() => handleDelete(role)}
+                      onClick={() => deleteRole(role)}
                       className="text-red-500 hover:text-red-700"
+                      disabled={!permissions.includes("Delete Roles")}
                     >
                       <TrashIcon className="h-6 w-6" />
                     </button>
@@ -223,34 +266,9 @@ const ManageRole = () => {
               ))}
             </ul>
           )}
-        
-          {selectedRole && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white p-6 rounded shadow-lg">
-                <h3 className="text-lg font-semibold">Confirm Deletion</h3>
-                <p>
-                  Are you sure you want to delete{" "}
-                  <strong>{selectedRole.name}</strong>?
-                </p>
-                <div className="mt-4 flex space-x-2">
-                  <button
-                    onClick={() => deleteRole(selectedRole)}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                  <button
-                    onClick={closeModal}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
+
       <ToastContainer />
     </div>
   );

@@ -16,7 +16,7 @@ This project is an **Admin Dashboard** built using **React.js** and styled with 
 ### User Management
 - Add users by filling out basic information:
   - **Fields**: Name, Username, Password, Contact Number, Email ID, Role, and Status (Available/Inavailable).
-- Assign a role to users during registration or updates.
+- Assign a role to users during registration.Only Admin can Edit the role.
 - Mark users as inavailable to display their details in a disabled state.
 - Validate all inputs:
   - Email and Contact numbers are checked for correct format.
@@ -24,6 +24,12 @@ This project is an **Admin Dashboard** built using **React.js** and styled with 
   - Ensures username uniqueness; duplicates raise an alert.
 - List all users in the **Users List** section.
 
+ ### Access based on Roles/Permissions
+    - features in Dashboard like Add/Edit User,View User,Delete User,Add/Edit Roles,View Roles,Delete roles will be enabled based on permission.
+    -Eg:if a particular role doesn't have a permission to add user, that add user button will be disabled for that particular role.
+   - Only Admin can update the Role and Status of users.
+   - If Edit User is enabled for a user(nonadmin),he can only update his details.he is not allowed to edit other user details.
+    
 ### Interactivity
 - **React-Toastify**:
   - Displays toast messages for success or error notifications.
@@ -31,9 +37,10 @@ This project is an **Admin Dashboard** built using **React.js** and styled with 
 - Confirmation modals appear before deleting any user or role.
 
 ### Authentication
-- **Login Page** (`/login`):
-  - Admin can log in to access the dashboard.
-  - Non-admin users are restricted with a toast message.
+- **Login Page** (`/`):
+  - users can log in by entering username and password to access the dashboard.
+  -Logined user's username and role is displayed in dashboard.
+  
 - **Registration Page** (`/register`):
   - Allows new users to be added to the system.
 
@@ -68,12 +75,11 @@ npm install react-toastify
 npm install @heroicons/react
 
 npm start
-This will launch the app at http://localhost:3000. (admin dashboard)
+This will launch the app at http://localhost:3000. (login page)
 
-Navigate to /login for the login form.
-
-Navigate to /register for the user registration form.
-
+Navigate to /register for registering user
+Navigate to / for the login form.
+after successfull login it will redirect to Dashboard.
 
 ### Technologies Used:
 React.js: Frontend framework for building the UI.

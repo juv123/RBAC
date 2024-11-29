@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const UserComponent = ({ addUser, editUser, userToEdit, clearEdit }) => {
+const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,userType }) => {
   const [name, setName] = useState('');
   const [contactNo, setContactNo] = useState('');
   const [email, setEmail] = useState('');
@@ -174,6 +174,7 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit }) => {
             onChange={(e) => setRole(e.target.value)}
             required
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
+            disabled={userType && userType?.toLowerCase()!=='admin'}
           >
             {roles.map((role, index) => (
               <option key={index} value={role.name}>
@@ -189,6 +190,7 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit }) => {
             onChange={(e) => setStatus(e.target.value)}
             required
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
+            disabled={userType?.toLowerCase()!=='admin'}
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>

@@ -33,16 +33,15 @@ const Login = () => {
 
       if (user) {
        
-        if(user.role=='admin'){
+        //if(user.role=='admin'){
           toast.success(`${username} has logged in successfully!`);
-        setTimeout(() => {
-          navigate("/Dashboard");
+         setTimeout(() => {navigate("/Dashboard", { state: { role: user.role, username:user.username } });
         }, 3000); // 3-second delay to allow the toast to display
-      } else if(user.role=='user' || user.role=='guest') {
+      /*} else if(user.role=='user' || user.role=='guest') {
         toast.error("Only Admins can acess Admin Dashboard");
       }
       else{
-      }
+      }*/
     
     } else {
       toast.error("No user data found. Please register first.");

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,userType }) => {
+const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions, userType }) => {
   const [name, setName] = useState('');
   const [contactNo, setContactNo] = useState('');
   const [email, setEmail] = useState('');
@@ -12,7 +12,8 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,u
   const [status, setStatus] = useState('active');
   const [error, setError] = useState('');
   const [roles, setRoles] = useState([]); // State to store roles from localStorage
-
+  const roleType = userType || "guest"; // Default to an empty string
+  //console.log(roleType);
   // Load roles from localStorage
   useEffect(() => {
     const savedRoles = JSON.parse(localStorage.getItem('roles')) || [];
@@ -37,7 +38,7 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,u
       setEmail('');
       setUsername('');
       setPassword('');
-      setRole(roles[0]?.name || ''); // Set default role based on roles from localStorage
+      setRole(roles[0]?.name || '');  // Set default role based on roles from localStorage
       setStatus('active');
     }
   }, [userToEdit, roles]);
@@ -68,7 +69,7 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,u
       setError('Invalid contact number format. It should be 10 digits.');
       return;
     }
-
+  
     const user = {
       name: sanitizeInput(name),
       contactNo: sanitizeInput(contactNo),
@@ -112,6 +113,8 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,u
     clearEdit(); // Clear the editing session
     setError('');
   };
+ 
+  //console.log(userType?.toLowerCase())
 
   return (
     <div>
@@ -169,18 +172,22 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,u
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 mb-1">Role:</label>
-          <select
-            value={userType=='admin'?role:'guest'}
+          <select  value={role}
             onChange={(e) => setRole(e.target.value)}
-            required
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
             disabled={userType?.toLowerCase()!=='admin'}
           >
-            {roles.map((role, index) => (
+            {roleType?.toLowerCase()==='admin'?(roles.map((role, index) => (
               <option key={index} value={role.name}>
                 {role.name}
               </option>
-            ))}
+            ))):
+            (
+              <option value={roleType}>
+                {roleType}
+              </option>
+            )}
+            
           </select>
         </div>
         <div className="mb-4">
@@ -188,7 +195,6 @@ const UserComponent = ({ addUser, editUser, userToEdit, clearEdit, permissions,u
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            required
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
             disabled={userType?.toLowerCase()!=='admin'}
           >

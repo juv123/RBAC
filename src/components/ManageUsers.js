@@ -120,7 +120,7 @@ if (storedPermissions && Array.isArray(storedPermissions)) {
      <UserIcon className="w-6 h-6 text-gray-700" />
   <div className="text-right">
     <p className="text-sm font-semibold font-sans">{username}</p> {/* Roboto */}
-    <p className="text-xs text-gray-500 font-mono text-violet-300">{role}</p>     {/* Fira Code */}
+    <p className="text-xs font-mono text-violet-300">{role}</p>     {/* Fira Code */}
   </div>
  
 </div>
